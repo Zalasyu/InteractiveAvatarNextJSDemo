@@ -1,18 +1,19 @@
 import React, { useEffect, useRef } from "react";
 
-import { useMessageHistory, MessageSender } from "../logic";
+import { useMessageHistory, MessageSender, useStreamingAvatarContext } from "../logic";
 
 export const MessageHistory: React.FC = () => {
   const { messages } = useMessageHistory();
+  const { isLLMProcessing, currentLLMResponse } = useStreamingAvatarContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
 
-    if (!container || messages.length === 0) return;
+    if (!container) return;
 
     container.scrollTop = container.scrollHeight;
-  }, [messages]);
+  }, [messages, currentLLMResponse]);
 
   return (
     <div
@@ -34,6 +35,22 @@ export const MessageHistory: React.FC = () => {
           <p className="text-sm">{message.content}</p>
         </div>
       ))}
+      {isLLMProcessing && (
+        <div className="flex flex-col gap-1 max-w-[350px] self-start items-start">
+          <p className="text-xs text-zinc-400">Avatar (thinking...)</p>
+          <div className="text-sm">
+            {currentLLMResponse ? (
+              <p className="italic opacity-80">{currentLLMResponse}</p>
+            ) : (
+              <div className="flex gap-1">
+                <span className="animate-bounce">●</span>
+                <span className="animate-bounce delay-100">●</span>
+                <span className="animate-bounce delay-200">●</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

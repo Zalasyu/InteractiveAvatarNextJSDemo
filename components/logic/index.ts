@@ -7,4 +7,6 @@ export {
   StreamingAvatarSessionState,
   StreamingAvatarProvider,
   MessageSender,
+  useStreamingAvatarContext,
 } from "./context";
+export type { Message } from "./types";

@@ -13,27 +13,54 @@ import { Select } from "../Select";
 
 import { Field } from "./Field";
 
-import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
+import { STT_LANGUAGE_LIST } from "@/app/lib/constants";
+import { AvatarOption } from "@/app/lib/avatar-filter";
 
 interface AvatarConfigProps {
   onConfigChange: (config: StartAvatarRequest) => void;
   config: StartAvatarRequest;
+  avatars?: AvatarOption[];
+  avatarsLoading?: boolean;
+  avatarsError?: string | null;
 }
 
 export const AvatarConfig: React.FC<AvatarConfigProps> = ({
   onConfigChange,
   config,
+  avatars = [],
+  avatarsLoading = false,
+  avatarsError = null,
 }) => {
   const onChange = <T extends keyof StartAvatarRequest>(
     key: T,
     value: StartAvatarRequest[T],
   ) => {
-    onConfigChange({ ...config, [key]: value });
+    // PRIORITY 4 LOGGING: Config changes from UI
+    console.log("[AvatarConfig] onChange called:", {
+      key,
+      value,
+      valueType: typeof value,
+      isUndefined: value === undefined,
+      currentConfig: JSON.stringify(config, null, 2),
+    });
+
+    const newConfig = { ...config, [key]: value };
+
+    console.log("[AvatarConfig] New config after change:", {
+      newConfig: JSON.stringify(newConfig, null, 2),
+      changedKey: key,
+      oldValue: config[key],
+      newValue: value,
+      hasKnowledgeId: "knowledgeId" in newConfig,
+      hasKnowledgeBase: "knowledgeBase" in newConfig,
+    });
+
+    onConfigChange(newConfig);
   };
   const [showMore, setShowMore] = useState<boolean>(false);
 
   const selectedAvatar = useMemo(() => {
-    const avatar = AVATARS.find(
+    const avatar = avatars.find(
       (avatar) => avatar.avatar_id === config.avatarName,
     );
 
@@ -46,46 +73,46 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
     } else {
       return {
         isCustom: false,
-        name: avatar.name,
+        name: avatar.avatar_name,
         avatarId: avatar.avatar_id,
       };
     }
-  }, [config.avatarName]);
+  }, [config.avatarName, avatars]);
 
   return (
     <div className="relative flex flex-col gap-4 w-[550px] py-8 max-h-full overflow-y-auto px-4">
-      <Field label="Custom Knowledge Base ID">
-        <Input
-          placeholder="Enter custom knowledge base ID"
-          value={config.knowledgeId}
-          onChange={(value) => onChange("knowledgeId", value)}
-        />
-      </Field>
+      {/* BUGFIX: Removed Custom Knowledge Base ID field to prevent knowledgeId: undefined from being added to config */}
       <Field label="Avatar ID">
-        <Select
-          isSelected={(option) =>
-            typeof option === "string"
-              ? !!selectedAvatar?.isCustom
-              : option.avatar_id === selectedAvatar?.avatarId
-          }
-          options={[...AVATARS, "CUSTOM"]}
-          placeholder="Select Avatar"
-          renderOption={(option) => {
-            return typeof option === "string"
-              ? "Custom Avatar ID"
-              : option.name;
-          }}
-          value={
-            selectedAvatar?.isCustom ? "Custom Avatar ID" : selectedAvatar?.name
-          }
-          onSelect={(option) => {
-            if (typeof option === "string") {
-              onChange("avatarName", "");
-            } else {
-              onChange("avatarName", option.avatar_id);
+        {avatarsLoading ? (
+          <div className="text-zinc-400 text-sm">Loading medical avatars...</div>
+        ) : avatarsError ? (
+          <div className="text-red-400 text-sm">Error loading avatars: {avatarsError}</div>
+        ) : (
+          <Select
+            isSelected={(option) =>
+              typeof option === "string"
+                ? !!selectedAvatar?.isCustom
+                : option.avatar_id === selectedAvatar?.avatarId
             }
-          }}
-        />
+            options={[...avatars, "CUSTOM"]}
+            placeholder="Select Avatar"
+            renderOption={(option) => {
+              return typeof option === "string"
+                ? "Custom Avatar ID"
+                : option.avatar_name;
+            }}
+            value={
+              selectedAvatar?.isCustom ? "Custom Avatar ID" : selectedAvatar?.name
+            }
+            onSelect={(option) => {
+              if (typeof option === "string") {
+                onChange("avatarName", "");
+              } else {
+                onChange("avatarName", option.avatar_id);
+              }
+            }}
+          />
+        )}
       </Field>
       {selectedAvatar?.isCustom && (
         <Field label="Custom Avatar ID">

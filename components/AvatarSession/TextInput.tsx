@@ -6,26 +6,29 @@ import { Select } from "../Select";
 import { Button } from "../Button";
 import { SendIcon } from "../Icons";
 import { useTextChat } from "../logic/useTextChat";
+import { useLLMChat } from "../logic/useLLMChat";
 import { Input } from "../Input";
 import { useConversationState } from "../logic/useConversationState";
 
 export const TextInput: React.FC = () => {
   const { sendMessage, sendMessageSync, repeatMessage, repeatMessageSync } =
     useTextChat();
+  const { sendToLLM, isLLMProcessing } = useLLMChat();
   const { startListening, stopListening } = useConversationState();
   const [taskType, setTaskType] = useState<TaskType>(TaskType.TALK);
   const [taskMode, setTaskMode] = useState<TaskMode>(TaskMode.ASYNC);
   const [message, setMessage] = useState("");
 
-  const handleSend = useCallback(() => {
-    if (message.trim() === "") {
+  const handleSend = useCallback(async () => {
+    if (message.trim() === "" || isLLMProcessing) {
       return;
     }
+
+    // For TALK task type, use LLM integration
     if (taskType === TaskType.TALK) {
-      taskMode === TaskMode.SYNC
-        ? sendMessageSync(message)
-        : sendMessage(message);
+      await sendToLLM(message);
     } else {
+      // For REPEAT task type, send directly to avatar (no LLM processing)
       taskMode === TaskMode.SYNC
         ? repeatMessageSync(message)
         : repeatMessage(message);
@@ -35,8 +38,8 @@ export const TextInput: React.FC = () => {
     taskType,
     taskMode,
     message,
-    sendMessage,
-    sendMessageSync,
+    isLLMProcessing,
+    sendToLLM,
     repeatMessage,
     repeatMessageSync,
   ]);
@@ -81,12 +84,25 @@ export const TextInput: React.FC = () => {
       />
       <Input
         className="min-w-[500px]"
-        placeholder={`Type something for the avatar to ${taskType === TaskType.REPEAT ? "repeat" : "respond"}...`}
+        placeholder={
+          isLLMProcessing
+            ? "Processing..."
+            : `Type something for the avatar to ${taskType === TaskType.REPEAT ? "repeat" : "respond"}...`
+        }
         value={message}
         onChange={setMessage}
+        disabled={isLLMProcessing}
       />
-      <Button className="!p-2" onClick={handleSend}>
-        <SendIcon size={20} />
+      <Button
+        className="!p-2"
+        onClick={handleSend}
+        disabled={isLLMProcessing || message.trim() === ""}
+      >
+        {isLLMProcessing ? (
+          <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+        ) : (
+          <SendIcon size={20} />
+        )}
       </Button>
     </div>
   );

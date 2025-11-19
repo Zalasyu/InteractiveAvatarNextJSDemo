@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/zalasyu/Documents/Zalattria_LLC/TiberHealthInnovation/projects/Tiberhealth/AI Avatar/LiveAvatar/logs/.f0a0ad878daeb3e66917515f8c0af1d2cb39a26a-audit.json",
+    "files": [
+        {
+            "date": 1763476315896,
+            "name": "/home/zalasyu/Documents/Zalattria_LLC/TiberHealthInnovation/projects/Tiberhealth/AI Avatar/LiveAvatar/logs/mcp-puppeteer-2025-11-18.log",
+            "hash": "1b1bd0d803120cfd5ecc25baba50d3c37580d21200558af947f6f315bc911692"
+        }
+    ],
+    "hashType": "sha256"
+}

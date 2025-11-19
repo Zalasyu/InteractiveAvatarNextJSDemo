@@ -2,22 +2,27 @@ export const AVATARS = [
   {
     avatar_id: "Ann_Therapist_public",
     name: "Ann Therapist",
+    default_voice: "6eafa43fdc16437b8f5abe512cc2b3cf",
   },
   {
     avatar_id: "Shawn_Therapist_public",
     name: "Shawn Therapist",
+    default_voice: "606c9d2a08be4e4f8cb38eafef8090de",
   },
   {
     avatar_id: "Bryan_FitnessCoach_public",
     name: "Bryan Fitness Coach",
+    default_voice: "fb26447f569c47dba853f23c92dfa411",
   },
   {
     avatar_id: "Dexter_Doctor_Standing2_public",
     name: "Dexter Doctor Standing",
+    default_voice: "f6f8c67d7e9943f8ab3a135f9d42ecd2",
   },
   {
     avatar_id: "Elenora_IT_Sitting_public",
     name: "Elenora Tech Expert",
+    default_voice: "294e54c30d2c4aad9b8a326ea1ad96cf",
   },
 ];
 
